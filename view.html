@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Viewer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+        }
+        .pixel-art {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 1px;
+            width: 320px;
+            height: 320px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            background-color: #ddd;
+        }
+        .pixel {
+            width: 100%;
+            height: 100%;
+        }
+        .error {
+            color: #ff6b6b;
+            margin: 20px 0;
+        }
+        .info {
+            color: #666;
+            margin: 15px 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #4ecdc4;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+        .back-link:hover {
+            background: #26a69a;
+        }
+        .edit-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+        .edit-link:hover {
+            background: #5a6fd8;
+        }
+        .save-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .save-btn:hover {
+            background: #ff5252;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Pixel Art</h1>
+        <div id="content">
+            <div class="info">Loading pixel art...</div>
+        </div>
+        <div id="controls" style="display: none;">
+            <button id="saveBtn" class="save-btn">💾 Save as PNG</button>
+            <a href="#" id="editLink" class="edit-link">✏️ Edit This Art</a>
+            <a href="index.html" class="back-link">🎨 Create New Pixel Art</a>
+        </div>
+    </div>
+
+    <script>
+        let currentPixelData = null;
+
+        function decodePixelArt() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const data = urlParams.get('data');
+            
+            if (!data) {
+                document.getElementById('content').innerHTML = '<div class="error">No pixel art data found in URL.</div>';
+                return;
+            }
+
+            try {
+                // Parse the compact format: palette|encoded
+                const [palette, encoded] = data.split('|');
+                
+                if (!palette || !encoded) {
+                    throw new Error('Invalid data format');
+                }
+
+                // Rebuild color palette
+                const colors = [];
+                for (let i = 0; i < palette.length; i += 6) {
+                    colors.push('#' + palette.substr(i, 6));
+                }
+
+                // Decode pixel data
+                const pixelData = [];
+                for (let i = 0; i < encoded.length; i++) {
+                    const colorIndex = parseInt(encoded[i], 36);
+                    pixelData.push(colors[colorIndex] || '#ffffff');
+                }
+
+                // Pad to 256 pixels if needed
+                while (pixelData.length < 256) {
+                    pixelData.push('#ffffff');
+                }
+
+                // Store for save/edit functions
+                currentPixelData = pixelData;
+
+                // Display the pixel art
+                displayPixelArt(pixelData);
+                
+                // Show controls
+                document.getElementById('controls').style.display = 'block';
+                
+                // Set up edit link
+                const editLink = document.getElementById('editLink');
+                const editUrl = `index.html?data=${encodeURIComponent(data)}`;
+                editLink.href = editUrl;
+                
+            } catch (error) {
+                console.error('Error decoding pixel art:', error);
+                document.getElementById('content').innerHTML = '<div class="error">Error loading pixel art. The data might be corrupted.</div>';
+            }
+        }
+
+        function displayPixelArt(pixelData) {
+            const container = document.getElementById('content');
+            container.innerHTML = '<div class="pixel-art" id="pixelArt"></div>';
+            
+            const pixelArt = document.getElementById('pixelArt');
+            
+            for (let i = 0; i < 256; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'pixel';
+                pixel.style.backgroundColor = pixelData[i] || '#ffffff';
+                pixelArt.appendChild(pixel);
+            }
+
+            // Add info about the artwork
+            const info = document.createElement('div');
+            info.className = 'info';
+            const uniqueColors = [...new Set(pixelData)].length;
+            info.textContent = `16×16 pixel art with ${uniqueColors} unique colors`;
+            container.appendChild(info);
+        }
+
+        function savePixelArt() {
+            if (!currentPixelData) {
+                alert('No pixel art data to save!');
+                return;
+            }
+
+            try {
+                // Create a canvas to generate the PNG
+                const canvas = document.createElement('canvas');
+                canvas.width = 16;
+                canvas.height = 16;
+                const ctx = canvas.getContext('2d');
+                
+                // Draw each pixel
+                for (let i = 0; i < currentPixelData.length; i++) {
+                    const x = i % 16;
+                    const y = Math.floor(i / 16);
+                    
+                    ctx.fillStyle = currentPixelData[i];
+                    ctx.fillRect(x, y, 1, 1);
+                }
+                
+                // Convert to data URL and trigger download
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'pixel-art.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/png');
+                
+            } catch (error) {
+                console.error('Error saving pixel art:', error);
+                alert('Error saving pixel art: ' + error.message);
+            }
+        }
+
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            decodePixelArt();
+            
+            document.getElementById('saveBtn').addEventListener('click', savePixelArt);
+        });
+    </script>
+</body>
+</html>
