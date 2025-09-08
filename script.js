@@ -64,13 +64,6 @@ class PixelArtMaker {
             });
         });
 
-        // Custom color picker
-        const customColorPicker = document.getElementById('customColorPicker');
-        customColorPicker.addEventListener('change', (e) => {
-            this.selectColor(e.target.value);
-            this.closeColorModal();
-        });
-
         // Pixel canvas interactions
         const canvas = document.getElementById('pixelCanvas');
         
@@ -179,11 +172,6 @@ class PixelArtMaker {
                 colorOption.classList.add('selected');
             }
         });
-        
-        // Update custom color picker if it's a standard hex color
-        if (this.currentColor !== 'transparent' && this.currentColor.match(/^#[0-9A-F]{6}$/i)) {
-            document.getElementById('customColorPicker').value = this.currentColor;
-        }
     }
 
     openColorModal() {

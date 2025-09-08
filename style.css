@@ -75,11 +75,13 @@ main {
     grid-template-columns: repeat(16, 1fr);
     grid-template-rows: repeat(16, 1fr);
     gap: 1px;
-    width: 400px;
-    height: 400px;
+    width: 90vw;
+    max-width: 600px;
+    aspect-ratio: 1 / 1;
     border: 2px solid #333;
     background-color: #ddd;
     margin: 0 auto;
+    background: white;
 }
 
 .pixel {
@@ -214,6 +216,10 @@ main {
     color: #333;
     text-align: center;
     font-family: 'VT323', monospace;
+}
+
+#exportBtn {
+    background: green;
 }
 
 /* Modal styles */
@@ -401,8 +407,8 @@ main {
     }
     
     .pixel-canvas {
-        width: 320px;
-        height: 320px;
+        width: 100%;
+        /* max-width: 400px; */
     }
     
     .container {
@@ -416,8 +422,8 @@ main {
 
 @media (max-width: 480px) {
     .pixel-canvas {
-        width: 280px;
-        height: 280px;
+        width: 98vw;
+        /* max-width: 350px; */
     }
     
     .icon-button {
