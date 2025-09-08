@@ -1,7 +1,7 @@
 class PixelArtMaker {
     constructor() {
         this.gridSize = 16;
-        this.pixelData = Array(this.gridSize * this.gridSize).fill('#ffffff');
+        this.pixelData = Array(this.gridSize * this.gridSize).fill('transparent');
         this.currentColor = '#000000';
         this.isDrawing = false;
         
@@ -21,29 +21,47 @@ class PixelArtMaker {
         
         for (let i = 0; i < this.gridSize * this.gridSize; i++) {
             const pixel = document.createElement('div');
-            pixel.className = 'pixel';
+            pixel.className = 'pixel transparent';
             pixel.dataset.index = i;
             canvas.appendChild(pixel);
         }
     }
 
     setupEventListeners() {
-        // Color picker
-        const colorPicker = document.getElementById('colorPicker');
-        colorPicker.addEventListener('change', (e) => {
-            this.currentColor = e.target.value;
-            this.updateCurrentColorDisplay();
-            this.updatePaletteSelection();
+        // Current color indicator opens modal
+        const currentColorEl = document.getElementById('currentColor');
+        currentColorEl.addEventListener('click', () => {
+            this.openColorModal();
         });
 
-        // Palette colors
-        document.querySelectorAll('.palette-color').forEach(paletteColor => {
-            paletteColor.addEventListener('click', (e) => {
-                this.currentColor = e.target.dataset.color;
-                colorPicker.value = this.currentColor;
-                this.updateCurrentColorDisplay();
-                this.updatePaletteSelection();
+        // Modal functionality
+        const modal = document.getElementById('colorModal');
+        const closeModal = document.getElementById('closeModal');
+        
+        closeModal.addEventListener('click', () => {
+            this.closeColorModal();
+        });
+
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeColorModal();
+            }
+        });
+
+        // Preset color options
+        document.querySelectorAll('.color-option').forEach(colorOption => {
+            colorOption.addEventListener('click', (e) => {
+                this.selectColor(e.target.dataset.color);
+                this.closeColorModal();
             });
+        });
+
+        // Custom color picker
+        const customColorPicker = document.getElementById('customColorPicker');
+        customColorPicker.addEventListener('change', (e) => {
+            this.selectColor(e.target.value);
+            this.closeColorModal();
         });
 
         // Pixel canvas interactions
@@ -101,36 +119,68 @@ class PixelArtMaker {
         document.getElementById('exportBtn').addEventListener('click', () => {
             this.exportAsQR();
         });
-
-        // Test QR button for debugging
-        document.getElementById('testQR').addEventListener('click', () => {
-            this.testQR();
-        });
     }
 
     paintPixel(pixelElement) {
         const index = parseInt(pixelElement.dataset.index);
         this.pixelData[index] = this.currentColor;
-        pixelElement.style.backgroundColor = this.currentColor;
+        
+        if (this.currentColor === 'transparent') {
+            pixelElement.style.backgroundColor = 'transparent';
+            pixelElement.classList.add('transparent');
+        } else {
+            pixelElement.style.backgroundColor = this.currentColor;
+            pixelElement.classList.remove('transparent');
+        }
     }
 
     updateCurrentColorDisplay() {
-        document.getElementById('currentColor').style.backgroundColor = this.currentColor;
+        const currentColorEl = document.getElementById('currentColor');
+        if (this.currentColor === 'transparent') {
+            currentColorEl.style.backgroundColor = 'transparent';
+            currentColorEl.className = 'current-color transparent-swatch';
+        } else {
+            currentColorEl.style.backgroundColor = this.currentColor;
+            currentColorEl.className = 'current-color';
+        }
     }
 
-    updatePaletteSelection() {
-        document.querySelectorAll('.palette-color').forEach(paletteColor => {
-            paletteColor.classList.remove('selected');
-            if (paletteColor.dataset.color === this.currentColor) {
-                paletteColor.classList.add('selected');
+    selectColor(color) {
+        this.currentColor = color;
+        this.updateCurrentColorDisplay();
+        this.updateModalSelection();
+    }
+
+    updateModalSelection() {
+        document.querySelectorAll('.color-option').forEach(colorOption => {
+            colorOption.classList.remove('selected');
+            if (colorOption.dataset.color === this.currentColor) {
+                colorOption.classList.add('selected');
             }
         });
+        
+        // Update custom color picker if it's a standard hex color
+        if (this.currentColor !== 'transparent' && this.currentColor.match(/^#[0-9A-F]{6}$/i)) {
+            document.getElementById('customColorPicker').value = this.currentColor;
+        }
+    }
+
+    openColorModal() {
+        const modal = document.getElementById('colorModal');
+        modal.classList.add('active');
+        this.updateModalSelection();
+    }
+
+    closeColorModal() {
+        const modal = document.getElementById('colorModal');
+        modal.classList.remove('active');
     }
 
     clearCanvas() {
-        this.pixelData.fill('#ffffff');
+        this.pixelData.fill('transparent');
         document.querySelectorAll('.pixel').forEach(pixel => {
-            pixel.style.backgroundColor = '#ffffff';
+            pixel.style.backgroundColor = 'transparent';
+            pixel.classList.add('transparent');
         });
     }
 
@@ -151,13 +201,19 @@ class PixelArtMaker {
             canvas.height = this.gridSize;
             const ctx = canvas.getContext('2d');
             
+            // Clear canvas with transparent background
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
             // Draw each pixel
             for (let i = 0; i < this.pixelData.length; i++) {
                 const x = i % this.gridSize;
                 const y = Math.floor(i / this.gridSize);
                 
-                ctx.fillStyle = this.pixelData[i];
-                ctx.fillRect(x, y, 1, 1);
+                // Only draw non-transparent pixels
+                if (this.pixelData[i] !== 'transparent') {
+                    ctx.fillStyle = this.pixelData[i];
+                    ctx.fillRect(x, y, 1, 1);
+                }
             }
             
             // Convert to PNG data URL
@@ -243,48 +299,21 @@ class PixelArtMaker {
             return colorMap.get(color);
         }).join('');
         
-        // Create color palette string (remove # from hex colors)
+        // Create color palette string
         const palette = Array.from(colorMap.entries())
             .sort((a, b) => a[1].localeCompare(b[1]))
-            .map(([color]) => color.substring(1))
-            .join('');
+            .map(([color]) => {
+                // Handle transparent separately from hex colors
+                if (color === 'transparent') {
+                    return 'transparent';
+                } else {
+                    // Remove # from hex colors
+                    return color.substring(1);
+                }
+            })
+            .join('|');
         
-        return `${palette}|${encoded}`;
-    }
-
-    testQR() {
-        try {
-            console.log('Testing QR generation...');
-            console.log('QRious available:', typeof QRious);
-            
-            if (typeof QRious === 'undefined') {
-                alert('QRious not available!');
-                return;
-            }
-
-            const qrContainer = document.getElementById('qrContainer');
-            const qrCodeElement = document.getElementById('qrcode');
-            
-            qrCodeElement.innerHTML = '<h3>Test QR Code:</h3>';
-            
-            const testCanvas = document.createElement('canvas');
-            qrCodeElement.appendChild(testCanvas);
-            
-            const qr = new QRious({
-                element: testCanvas,
-                value: 'https://www.google.com',
-                size: 200
-            });
-            
-            qrContainer.style.display = 'block';
-            qrContainer.scrollIntoView({ behavior: 'smooth' });
-            
-            console.log('Test QR created successfully');
-            
-        } catch (error) {
-            console.error('Test QR failed:', error);
-            alert('Test QR failed: ' + error.message);
-        }
+        return `${palette}||${encoded}`;
     }
 
     loadFromURL() {
@@ -294,30 +323,37 @@ class PixelArtMaker {
         if (!data) return;
 
         try {
-            // Parse the compact format: palette|encoded
-            const [palette, encoded] = data.split('|');
-            
-            if (!palette || !encoded) {
+            // Parse the compact format: palette||encoded
+            const parts = data.split('||');
+            if (parts.length !== 2) {
                 console.error('Invalid data format in URL');
                 return;
             }
-
+            
+            const [paletteStr, encoded] = parts;
+            
             // Rebuild color palette
             const colors = [];
-            for (let i = 0; i < palette.length; i += 6) {
-                colors.push('#' + palette.substr(i, 6));
+            const paletteColors = paletteStr.split('|');
+            
+            for (const colorStr of paletteColors) {
+                if (colorStr === 'transparent') {
+                    colors.push('transparent');
+                } else if (colorStr.length === 6) {
+                    colors.push('#' + colorStr);
+                }
             }
 
             // Decode pixel data
             const pixelData = [];
             for (let i = 0; i < encoded.length; i++) {
                 const colorIndex = parseInt(encoded[i], 36);
-                pixelData.push(colors[colorIndex] || '#ffffff');
+                pixelData.push(colors[colorIndex] || 'transparent');
             }
 
             // Pad to 256 pixels if needed
             while (pixelData.length < 256) {
-                pixelData.push('#ffffff');
+                pixelData.push('transparent');
             }
 
             // Load the pixel data into the editor
@@ -326,7 +362,14 @@ class PixelArtMaker {
             // Update the visual grid
             const pixels = document.querySelectorAll('.pixel');
             pixels.forEach((pixel, index) => {
-                pixel.style.backgroundColor = this.pixelData[index];
+                const color = this.pixelData[index];
+                if (color === 'transparent') {
+                    pixel.style.backgroundColor = 'transparent';
+                    pixel.classList.add('transparent');
+                } else {
+                    pixel.style.backgroundColor = color;
+                    pixel.classList.remove('transparent');
+                }
             });
 
             console.log('Loaded pixel art from URL');

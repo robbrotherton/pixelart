@@ -22,26 +22,13 @@
 
             <div class="controls-section">
                 <div class="color-picker-container">
-                    <label for="colorPicker">Choose Color:</label>
-                    <input type="color" id="colorPicker" value="#000000">
-                    <div class="current-color" id="currentColor"></div>
+                    <label for="currentColor">Current Color:</label>
+                    <div class="current-color" id="currentColor" title="Click to change color"></div>
                 </div>
 
                 <div class="tool-buttons">
                     <button id="clearCanvas">Clear Canvas</button>
                     <button id="exportBtn">Export as QR Code</button>
-                    <button id="testQR">Test QR</button>
-                </div>
-
-                <div class="palette">
-                    <div class="palette-color" data-color="#000000" style="background-color: #000000;"></div>
-                    <div class="palette-color" data-color="#ffffff" style="background-color: #ffffff;"></div>
-                    <div class="palette-color" data-color="#ff0000" style="background-color: #ff0000;"></div>
-                    <div class="palette-color" data-color="#00ff00" style="background-color: #00ff00;"></div>
-                    <div class="palette-color" data-color="#0000ff" style="background-color: #0000ff;"></div>
-                    <div class="palette-color" data-color="#ffff00" style="background-color: #ffff00;"></div>
-                    <div class="palette-color" data-color="#ff00ff" style="background-color: #ff00ff;"></div>
-                    <div class="palette-color" data-color="#00ffff" style="background-color: #00ffff;"></div>
                 </div>
             </div>
 
@@ -53,6 +40,40 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div class="modal-overlay" id="colorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Choose Color</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="preset-colors">
+                    <div class="color-option transparent-swatch" data-color="transparent" title="Transparent"></div>
+                    <div class="color-option" data-color="#000000" title="Black"></div>
+                    <div class="color-option" data-color="#ffffff" title="White"></div>
+                    <div class="color-option" data-color="#ff0000" title="Red"></div>
+                    <div class="color-option" data-color="#00ff00" title="Green"></div>
+                    <div class="color-option" data-color="#0000ff" title="Blue"></div>
+                    <div class="color-option" data-color="#ffff00" title="Yellow"></div>
+                    <div class="color-option" data-color="#ff00ff" title="Magenta"></div>
+                    <div class="color-option" data-color="#00ffff" title="Cyan"></div>
+                    <div class="color-option" data-color="#ffa500" title="Orange"></div>
+                    <div class="color-option" data-color="#800080" title="Purple"></div>
+                    <div class="color-option" data-color="#008000" title="Dark Green"></div>
+                    <div class="color-option" data-color="#800000" title="Maroon"></div>
+                    <div class="color-option" data-color="#000080" title="Navy"></div>
+                    <div class="color-option" data-color="#808080" title="Gray"></div>
+                    <div class="color-option" data-color="#ffc0cb" title="Pink"></div>
+                </div>
+                <div class="custom-color-section">
+                    <label for="customColorPicker">Custom Color:</label>
+                    <input type="color" id="customColorPicker" value="#000000">
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="qrcode.min.js"></script>

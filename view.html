@@ -37,6 +37,16 @@
             width: 100%;
             height: 100%;
         }
+        .pixel.transparent {
+            background-image: 
+                linear-gradient(45deg, #d0d0d0 25%, transparent 25%),
+                linear-gradient(-45deg, #d0d0d0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #d0d0d0 75%),
+                linear-gradient(-45deg, transparent 75%, #d0d0d0 75%);
+            background-size: 4px 4px;
+            background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+            background-color: #f0f0f0;
+        }
         .error {
             color: #ff6b6b;
             margin: 20px 0;
@@ -113,29 +123,36 @@
             }
 
             try {
-                // Parse the compact format: palette|encoded
-                const [palette, encoded] = data.split('|');
-                
-                if (!palette || !encoded) {
+                // Parse the compact format: palette||encoded
+                const parts = data.split('||');
+                if (parts.length !== 2) {
                     throw new Error('Invalid data format');
                 }
+                
+                const [paletteStr, encoded] = parts;
 
                 // Rebuild color palette
                 const colors = [];
-                for (let i = 0; i < palette.length; i += 6) {
-                    colors.push('#' + palette.substr(i, 6));
+                const paletteColors = paletteStr.split('|');
+                
+                for (const colorStr of paletteColors) {
+                    if (colorStr === 'transparent') {
+                        colors.push('transparent');
+                    } else if (colorStr.length === 6) {
+                        colors.push('#' + colorStr);
+                    }
                 }
 
                 // Decode pixel data
                 const pixelData = [];
                 for (let i = 0; i < encoded.length; i++) {
                     const colorIndex = parseInt(encoded[i], 36);
-                    pixelData.push(colors[colorIndex] || '#ffffff');
+                    pixelData.push(colors[colorIndex] || 'transparent');
                 }
 
                 // Pad to 256 pixels if needed
                 while (pixelData.length < 256) {
-                    pixelData.push('#ffffff');
+                    pixelData.push('transparent');
                 }
 
                 // Store for save/edit functions
@@ -166,8 +183,16 @@
             
             for (let i = 0; i < 256; i++) {
                 const pixel = document.createElement('div');
-                pixel.className = 'pixel';
-                pixel.style.backgroundColor = pixelData[i] || '#ffffff';
+                const color = pixelData[i] || 'transparent';
+                
+                if (color === 'transparent') {
+                    pixel.className = 'pixel transparent';
+                    pixel.style.backgroundColor = 'transparent';
+                } else {
+                    pixel.className = 'pixel';
+                    pixel.style.backgroundColor = color;
+                }
+                
                 pixelArt.appendChild(pixel);
             }
 
@@ -192,13 +217,19 @@
                 canvas.height = 16;
                 const ctx = canvas.getContext('2d');
                 
+                // Clear canvas with transparent background
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
                 // Draw each pixel
                 for (let i = 0; i < currentPixelData.length; i++) {
                     const x = i % 16;
                     const y = Math.floor(i / 16);
                     
-                    ctx.fillStyle = currentPixelData[i];
-                    ctx.fillRect(x, y, 1, 1);
+                    // Only draw non-transparent pixels
+                    if (currentPixelData[i] !== 'transparent') {
+                        ctx.fillStyle = currentPixelData[i];
+                        ctx.fillRect(x, y, 1, 1);
+                    }
                 }
                 
                 // Convert to data URL and trigger download
