@@ -5,11 +5,16 @@
     padding: 0;
 }
 
+button, input, label {
+    font-family: 'VT323', monospace;
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'VT323', 'Courier New', monospace;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
+    font-size: 18px;
 }
 
 .container {
@@ -26,7 +31,7 @@ header {
 }
 
 header h1 {
-    font-size: 2.5rem;
+    font-size: 3rem;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     display: flex;
@@ -165,8 +170,8 @@ main {
     margin-bottom: 10px;
     border: none;
     border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 16px;
+    font-family: 'VT323', monospace;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -253,6 +258,7 @@ main {
     background: none;
     border: none;
     font-size: 24px;
+    font-family: 'VT323', monospace;
     cursor: pointer;
     color: #666;
     width: 30px;
