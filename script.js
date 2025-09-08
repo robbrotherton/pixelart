@@ -4,6 +4,12 @@ class PixelArtMaker {
         this.pixelData = Array(this.gridSize * this.gridSize).fill('transparent');
         this.currentColor = '#000000';
         this.isDrawing = false;
+        this.drawingStarted = false;
+        
+        // History system for undo functionality
+        this.history = [];
+        this.historyIndex = -1;
+        this.maxHistorySize = 50; // Limit history to prevent memory issues
         
         this.init();
     }
@@ -12,6 +18,7 @@ class PixelArtMaker {
         this.createPixelGrid();
         this.setupEventListeners();
         this.updateCurrentColorDisplay();
+        this.saveToHistory(); // Save initial empty state
         this.loadFromURL(); // Load pixel art from URL if available
     }
 
@@ -71,6 +78,7 @@ class PixelArtMaker {
         canvas.addEventListener('mousedown', (e) => {
             if (e.target.classList.contains('pixel')) {
                 this.isDrawing = true;
+                this.drawingStarted = true; // Flag to save history at end
                 this.paintPixel(e.target);
             }
         });
@@ -82,6 +90,10 @@ class PixelArtMaker {
         });
 
         document.addEventListener('mouseup', () => {
+            if (this.isDrawing && this.drawingStarted) {
+                this.saveToHistory(); // Save state after drawing session
+                this.drawingStarted = false;
+            }
             this.isDrawing = false;
         });
 
@@ -92,6 +104,7 @@ class PixelArtMaker {
             const element = document.elementFromPoint(touch.clientX, touch.clientY);
             if (element && element.classList.contains('pixel')) {
                 this.isDrawing = true;
+                this.drawingStarted = true; // Flag to save history at end
                 this.paintPixel(element);
             }
         });
@@ -108,10 +121,18 @@ class PixelArtMaker {
         });
 
         document.addEventListener('touchend', () => {
+            if (this.isDrawing && this.drawingStarted) {
+                this.saveToHistory(); // Save state after drawing session
+                this.drawingStarted = false;
+            }
             this.isDrawing = false;
         });
 
         // Control buttons
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            this.undo();
+        });
+
         document.getElementById('clearCanvas').addEventListener('click', () => {
             this.clearCanvas();
         });
@@ -182,6 +203,54 @@ class PixelArtMaker {
             pixel.style.backgroundColor = 'transparent';
             pixel.classList.add('transparent');
         });
+        this.saveToHistory(); // Save state after clearing
+    }
+
+    // History management methods
+    saveToHistory() {
+        // Remove any history after current index (when undoing then making new changes)
+        this.history = this.history.slice(0, this.historyIndex + 1);
+        
+        // Add current state to history
+        this.history.push([...this.pixelData]);
+        
+        // Limit history size
+        if (this.history.length > this.maxHistorySize) {
+            this.history.shift();
+        } else {
+            this.historyIndex++;
+        }
+        
+        // Update undo button state
+        this.updateUndoButton();
+    }
+
+    undo() {
+        if (this.historyIndex > 0) {
+            this.historyIndex--;
+            this.pixelData = [...this.history[this.historyIndex]];
+            this.restoreCanvasFromData();
+            this.updateUndoButton();
+        }
+    }
+
+    restoreCanvasFromData() {
+        const pixels = document.querySelectorAll('.pixel');
+        pixels.forEach((pixel, index) => {
+            const color = this.pixelData[index];
+            if (color === 'transparent') {
+                pixel.style.backgroundColor = 'transparent';
+                pixel.classList.add('transparent');
+            } else {
+                pixel.style.backgroundColor = color;
+                pixel.classList.remove('transparent');
+            }
+        });
+    }
+
+    updateUndoButton() {
+        const undoBtn = document.getElementById('undoBtn');
+        undoBtn.disabled = this.historyIndex <= 0;
     }
 
     async exportAsQR() {
@@ -373,6 +442,10 @@ class PixelArtMaker {
             });
 
             console.log('Loaded pixel art from URL');
+            
+            // Save the loaded state to history (but replace the initial empty state)
+            this.history[0] = [...this.pixelData];
+            this.updateUndoButton();
             
             // Clear the URL parameter so it doesn't interfere with future exports
             if (window.history && window.history.replaceState) {
