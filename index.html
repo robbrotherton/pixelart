@@ -24,15 +24,29 @@
             </div>
 
             <div class="controls-section">
-                <div class="color-picker-container">
-                    <label for="currentColor">Current Color:</label>
-                    <div class="current-color" id="currentColor" title="Click to change color"></div>
-                </div>
-
-                <div class="tool-buttons">
-                    <button id="undoBtn">Undo</button>
-                    <button id="clearCanvas">Clear Canvas</button>
-                    <button id="exportBtn">Export as QR Code</button>
+                <div class="icon-buttons">
+                    <div class="icon-button-item">
+                        <div class="current-color icon-button" id="currentColor" title="Click to change color"></div>
+                        <span class="icon-label">Color</span>
+                    </div>
+                    <div class="icon-button-item">
+                        <button class="icon-button" id="undoBtn" title="Undo last change">
+                            <img src="undo.png" alt="Undo" class="button-icon">
+                        </button>
+                        <span class="icon-label">Undo</span>
+                    </div>
+                    <div class="icon-button-item">
+                        <button class="icon-button" id="clearCanvas" title="Clear canvas">
+                            <img src="clear.png" alt="Clear" class="button-icon">
+                        </button>
+                        <span class="icon-label">Clear</span>
+                    </div>
+                    <div class="icon-button-item">
+                        <button class="icon-button" id="exportBtn" title="Export as QR Code">
+                            <img src="save.png" alt="Save" class="button-icon">
+                        </button>
+                        <span class="icon-label">Save</span>
+                    </div>
                 </div>
             </div>
 
