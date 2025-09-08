@@ -15,6 +15,7 @@ body {
     min-height: 100vh;
     color: #333;
     font-size: 18px;
+    margin: 0;
 }
 
 .container {
@@ -75,9 +76,8 @@ main {
     grid-template-columns: repeat(16, 1fr);
     grid-template-rows: repeat(16, 1fr);
     gap: 1px;
-    width: 90vw;
-    max-width: 600px;
-    aspect-ratio: 1 / 1;
+    width: 400px;
+    height: 400px;
     border: 2px solid #333;
     background-color: #ddd;
     margin: 0 auto;
@@ -400,6 +400,8 @@ main {
     
     .controls-section {
         width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
     }
     
     .icon-buttons {
@@ -407,8 +409,10 @@ main {
     }
     
     .pixel-canvas {
-        width: 100%;
-        /* max-width: 400px; */
+        width: calc(100vw - 60px);
+        height: calc(100vw - 60px);
+        max-width: 400px;
+        max-height: 400px;
     }
     
     .container {
@@ -422,8 +426,14 @@ main {
 
 @media (max-width: 480px) {
     .pixel-canvas {
-        width: 98vw;
-        /* max-width: 350px; */
+        width: calc(100vw - 50px);
+        height: calc(100vw - 50px);
+        max-width: 350px;
+        max-height: 350px;
+    }
+    
+    .container {
+        padding: 10px;
     }
     
     .icon-button {
