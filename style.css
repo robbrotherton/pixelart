@@ -15,6 +15,7 @@ body {
     min-height: 100vh;
     color: #333;
     font-size: 18px;
+    margin: 0;
 }
 
 .container {
@@ -80,6 +81,7 @@ main {
     border: 2px solid #333;
     background-color: #ddd;
     margin: 0 auto;
+    background: white;
 }
 
 .pixel {
@@ -214,6 +216,10 @@ main {
     color: #333;
     text-align: center;
     font-family: 'VT323', monospace;
+}
+
+#exportBtn {
+    background: green;
 }
 
 /* Modal styles */
@@ -394,6 +400,8 @@ main {
     
     .controls-section {
         width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
     }
     
     .icon-buttons {
@@ -401,8 +409,10 @@ main {
     }
     
     .pixel-canvas {
-        width: 320px;
-        height: 320px;
+        width: calc(100vw - 60px);
+        height: calc(100vw - 60px);
+        max-width: 400px;
+        max-height: 400px;
     }
     
     .container {
@@ -416,8 +426,14 @@ main {
 
 @media (max-width: 480px) {
     .pixel-canvas {
-        width: 280px;
-        height: 280px;
+        width: calc(100vw - 50px);
+        height: calc(100vw - 50px);
+        max-width: 350px;
+        max-height: 350px;
+    }
+    
+    .container {
+        padding: 10px;
     }
     
     .icon-button {
