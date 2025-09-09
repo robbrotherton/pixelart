@@ -365,7 +365,6 @@ main {
 /* Export section */
 .export-section {
     grid-column: 1 / -1;
-    margin-top: 30px;
 }
 
 .qr-container {
@@ -374,6 +373,17 @@ main {
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     text-align: center;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+    margin-top: 0;
+}
+
+.qr-container.visible {
+    max-height: 1000px;
+    opacity: 1;
+    margin-top: 30px;
 }
 
 .qr-container h3 {
@@ -448,7 +458,7 @@ main {
     }
     
     .preset-colors {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
     
     .color-option {

@@ -86,6 +86,7 @@ class PixelArtMaker {
             if (this.isDrawing && this.drawingStarted) {
                 this.saveToHistory(); // Save state after drawing session
                 this.drawingStarted = false;
+                this.hideQRContainer(); // Hide QR after drawing session ends
             }
             this.isDrawing = false;
         });
@@ -117,6 +118,7 @@ class PixelArtMaker {
             if (this.isDrawing && this.drawingStarted) {
                 this.saveToHistory(); // Save state after drawing session
                 this.drawingStarted = false;
+                this.hideQRContainer(); // Hide QR after drawing session ends
             }
             this.isDrawing = false;
         });
@@ -145,6 +147,13 @@ class PixelArtMaker {
         } else {
             pixelElement.style.backgroundColor = this.currentColor;
             pixelElement.classList.remove('transparent');
+        }
+    }
+
+    hideQRContainer() {
+        const qrContainer = document.getElementById('qrContainer');
+        if (qrContainer) {
+            qrContainer.classList.remove('visible');
         }
     }
 
@@ -192,6 +201,7 @@ class PixelArtMaker {
             pixel.classList.add('transparent');
         });
         this.saveToHistory(); // Save state after clearing
+        this.hideQRContainer();
     }
 
     // History management methods
@@ -219,6 +229,7 @@ class PixelArtMaker {
             this.pixelData = [...this.history[this.historyIndex]];
             this.restoreCanvasFromData();
             this.updateUndoButton();
+            this.hideQRContainer();
         }
     }
 
@@ -328,7 +339,7 @@ class PixelArtMaker {
             qrCodeElement.appendChild(linkContainer);
             
             // Show the QR container
-            qrContainer.style.display = 'block';
+            qrContainer.classList.add('visible');
             
             // Scroll to QR code
             qrContainer.scrollIntoView({ behavior: 'smooth' });
